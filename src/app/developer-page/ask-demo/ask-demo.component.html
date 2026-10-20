@@ -1,0 +1,75 @@
+<div class="demo">
+  <!-- Pipeline Frontend → Backend → IA -->
+  <div class="pipeline" aria-hidden="true">
+    @for (node of nodes; track node.id; let i = $index; let last = $last) {
+      <div class="pipeline__segment" [class.pipeline__segment--last]="last">
+        <div
+          class="node"
+          [class.node--active]="activeNodeId() === node.id"
+          [style.--c]="node.color"
+        >
+          @if (activeNodeId() === node.id) {
+            <span class="node__ring"></span>
+          }
+          <div class="node__label">{{ node.label }}</div>
+          <div class="node__sub">{{ node.sub }}</div>
+        </div>
+
+        @if (!last) {
+          <div class="wire">
+            @if (isForward(i)) {
+              <span class="packet" [style.--c]="nodes[i + 1].color"></span>
+            }
+            @if (isReturning(i)) {
+              <span class="packet packet--rev" style="--c: #2DD4BF"></span>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Preguntas -->
+  <div class="questions">
+    @for (q of questions; track q.id) {
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="questionId() === q.id"
+        [disabled]="busy()"
+        (click)="run(q.id)"
+      >
+        {{ q.label }}
+      </button>
+    }
+  </div>
+
+  <div class="output">
+    <!-- Respuesta en streaming -->
+    <div class="answer">
+      <div class="mono-label">RESPUESTA · {{ statusLabel() }}</div>
+      <div class="answer__question">› {{ questionLabel() }}</div>
+      <div class="answer__text" aria-live="polite">
+        @if (questionId()) {
+          {{ answer() }}
+        } @else {
+          Elige una pregunta y mira cómo viaja la petición.
+        }
+        @if (showCursor()) {
+          <span class="cursor" aria-hidden="true"></span>
+        }
+      </div>
+    </div>
+
+    <!-- Log de eventos -->
+    <div class="log" role="log" aria-label="Registro de eventos">
+      <div class="log__title">event-log</div>
+      @for (line of logs(); track $index) {
+        <div class="log__line">
+          <span class="log__tag" [style.color]="logColors[line.tag]">[{{ line.tag }}]</span>
+          <span>{{ line.text }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>
